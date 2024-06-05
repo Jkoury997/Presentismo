@@ -1,0 +1,88 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            display: flex;
+            min-height: 100vh;
+            align-items: center;
+            justify-content: center;
+            background-color: #f4f4f4;
+            padding: 48px 16px;
+        }
+        .card {
+            width: 100%;
+            max-width: 384px;
+            border-radius: 8px;
+            background-color: #ffffff;
+            padding: 32px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+        .header h1 {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333333;
+        }
+        .header p {
+            margin-top: 8px;
+            color: #888888;
+        }
+        .otp-container {
+            border-radius: 8px;
+            background-color: #f4f4f4;
+            padding: 32px;
+            text-align: center;
+            margin-bottom: 24px;
+        }
+        .otp-container span {
+            font-size: 48px;
+            font-weight: bold;
+            color: #333333;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 16px;
+        }
+        .footer p {
+            color: #888888;
+            margin: 4px 0;
+        }
+        .footer a {
+            color: #007BFF;
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <div class="header">
+                <h1>Your One-Time Password</h1>
+                <p>Use this code to verify your identity.</p>
+            </div>
+            <div class="otp-container">
+                <span>{{otpCode}}</span>
+            </div>
+            <div class="footer">
+                <p>This one-time password (OTP) is valid for the next 5 minutes.</p>
+                <p>Enter this code where prompted to complete your verification.</p>
+                <p><a href="#">Didn't receive the code?</a></p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+
