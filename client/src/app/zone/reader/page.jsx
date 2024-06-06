@@ -16,6 +16,13 @@ export default function Reader() {
   const [scanning, setScanning] = useState(false); // Estado para controlar el escaneo
   const router = useRouter();
 
+  useEffect(() => {
+    const zoneUUID = localStorage.getItem('zoneUUID');
+    if (!zoneUUID) {
+      router.push('/zone/configure');
+    }
+  }, [router]);
+
   async function registerAttendance(code, location) {
     const response = await fetch(`${NEXT_PUBLIC_URL_API_PRESENTISMO}/api/attendance/register-attendance`, {
       method: 'POST',
