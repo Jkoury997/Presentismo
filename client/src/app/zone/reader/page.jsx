@@ -24,7 +24,7 @@ export default function Reader() {
   }, [router]);
 
   async function registerAttendance(code, location) {
-    const response = await fetch(`${NEXT_PUBLIC_URL_API_PRESENTISMO}/api/attendance/register-attendance`, {
+    const response = await fetch(`/api/presentismo/attendance/register`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -40,7 +40,7 @@ export default function Reader() {
   }
 
   async function fetchEmployeeDetails(useruuid) {
-    const response = await fetch(`${NEXT_PUBLIC_URL_API_AUTH}/api/user/${useruuid}`);
+    const response = await fetch(`/api/auth/user?useruuid=${useruuid}`);
 
     if (!response.ok) {
       throw new Error('Failed to fetch employee details');
