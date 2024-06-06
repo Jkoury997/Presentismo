@@ -4,8 +4,8 @@ import CardEmployed from "@/components/component/card-employed";
 import { useRouter } from "next/navigation";
 import QRScanner from "@/components/component/QRScanner";
 
-const NEXT_PUBLIC_URL_API_AUTH = process.env.NEXT_PUBLIC_URL_API_AUTH;
-const NEXT_PUBLIC_URL_API_PRESENTISMO = process.env.NEXT_PUBLIC_URL_API_PRESENTISMO;
+const NEXT_PUBLIC_URL_API_AUTH = process.env.NEXT_PUBLIC_URL_API_AUTH
+const NEXT_PUBLIC_URL_API_PRESENTISMO = process.env.NEXT_PUBLIC_URL_API_PRESENTISMO
 
 export default function Reader() {
   const [employeeDetails, setEmployeeDetails] = useState(null);
@@ -13,7 +13,7 @@ export default function Reader() {
   const [message, setMessage] = useState('');
   const [error, setError] = useState(null);
   const [lastScannedCode, setLastScannedCode] = useState(null);
-  const [scanning, setScanning] = useState(false);
+  const [scanning, setScanning] = useState(false); // Estado para controlar el escaneo
   const router = useRouter();
 
   useEffect(() => {
@@ -22,6 +22,13 @@ export default function Reader() {
       router.push('/zone/configure');
     }
   }, [router]);
+
+  useEffect(() => {
+    // Limpiar el estado de escaneo al desmontar el componente
+    return () => {
+      setScanning(false);
+    };
+  }, []);
 
   async function registerAttendance(code, location) {
     const response = await fetch(`/api/presentismo/attendance/register`, {
@@ -51,7 +58,7 @@ export default function Reader() {
 
   const handleScan = async (data) => {
     if (data && data.text !== lastScannedCode && !scanning) {
-      setScanning(true);
+      setScanning(true); // Prevenir múltiples escaneos simultáneos
       const scannedCode = data.text;
       try {
         const location = localStorage.getItem('zoneUUID');
@@ -61,7 +68,7 @@ export default function Reader() {
         }
 
         console.log(`Sending scanned code: ${scannedCode} and location: ${location}`);
-
+        
         const attendanceResponse = await registerAttendance(scannedCode, location);
 
         // Fetch employee details from Auth API
@@ -71,14 +78,13 @@ export default function Reader() {
         setEmployee(employeeDetails);
         setMessage(`Employee ${employeeDetails.firstName} ${employeeDetails.lastName} checked in successfully`);
 
+        // Set last scanned code
         setLastScannedCode(scannedCode);
       } catch (error) {
         console.error('Error checking in employee:', error);
         setMessage('Error checking in employee');
       } finally {
-        setTimeout(() => {
-          setScanning(false); // Permitir nuevos escaneos después de un breve retraso
-        }, 3000);
+        setScanning(false); // Permitir nuevos escaneos
       }
     }
   };
