@@ -1,4 +1,4 @@
-const Attendance = require('../database/models/Attendance');
+const Attendance = require('../database/models/Attendace');
 const QRCode = require('../database/models/QRCode');
 const { sendNotification } = require('./notificationService'); // Importa la función de notificaciones
 
