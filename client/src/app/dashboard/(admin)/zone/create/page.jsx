@@ -13,9 +13,11 @@ export default function Page() {
   const [message, setMessage] = useState('');
   const router = useRouter();
 
+  const NEXT_PUBLIC_URL_API_PRESENTISMO = process.env.NEXT_PUBLIC_URL_API_PRESENTISMO
+
   const handleCreateZone = async () => {
     try {
-      const response = await fetch('http://localhost:3004/api/zones', {
+      const response = await fetch(`${NEXT_PUBLIC_URL_API_PRESENTISMO}/api/zones`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

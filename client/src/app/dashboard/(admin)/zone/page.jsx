@@ -7,6 +7,8 @@ import { QrCodeIcon, TrashIcon, EditIcon } from "lucide-react";
 import * as Dialog from '@radix-ui/react-dialog';
 import QRCode from 'react-qr-code';
 
+const NEXT_PUBLIC_URL_API_PRESENTISMO = process.env.NEXT_PUBLIC_URL_API_PRESENTISMO
+
 export default function Page() {
   const [zones, setZones] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -18,7 +20,7 @@ export default function Page() {
   useEffect(() => {
     const fetchZones = async () => {
       try {
-        const response = await fetch('http://localhost:3004/api/zones');
+        const response = await fetch(`${NEXT_PUBLIC_URL_API_PRESENTISMO}/api/zones`);
         const data = await response.json();
         setZones(data);
       } catch (error) {
@@ -34,7 +36,7 @@ export default function Page() {
 
   const handleDelete = async (id) => {
     try {
-      const response = await fetch(`http://localhost:3004/api/zones/${id}`, {
+      const response = await fetch(`${NEXT_PUBLIC_URL_API_PRESENTISMO}/api/zones/${id}`, {
         method: 'DELETE',
       });
 
