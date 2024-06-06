@@ -4,6 +4,8 @@ import CardEmployed from "@/components/component/card-employed";
 import { useRouter } from "next/navigation";
 import QRScanner from "@/components/component/QRScanner";
 
+const NEXT_PUBLIC_URL_API_AUTH = process.env.NEXT_PUBLIC_URL_API_AUTH;
+const NEXT_PUBLIC_URL_API_PRESENTISMO = process.env.NEXT_PUBLIC_URL_API_PRESENTISMO;
 
 export default function Reader() {
   const [employeeDetails, setEmployeeDetails] = useState(null);
@@ -82,12 +84,9 @@ export default function Reader() {
       } catch (error) {
         console.error('Error checking in employee:', error);
         setMessage('Error checking in employee');
-        setScanning(false);
       } finally {
-        // Permitir nuevos escaneos después de 3 segundos
-        setTimeout(() => {
-          setScanning(false);
-        }, 600);
+        setScanning(false); // Permitir nuevos escaneos
+        scannerRef.current.resetScanner(); // Reiniciar el escáner
       }
     }
   };
