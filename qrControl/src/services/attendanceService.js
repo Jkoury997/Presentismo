@@ -1,6 +1,5 @@
 const Attendance = require('../database/models/Attendace');
 const QRCode = require('../database/models/QRCode');
-const { sendNotificationToUser} = require('./webSocketService');
 
 const TIME_INTERVAL = 1 * 60 * 1000; // 1 minuto
 
@@ -35,7 +34,6 @@ const registerAttendance = async (code, location) => {
           // Registrar la salida
           existingAttendance.exitTime = currentTime;
           await existingAttendance.save();
-          sendNotificationToUser(useruuid, `Exit registered successfully for user at ${currentTime}`);
           console.log(`Exit registered successfully for useruuid=${useruuid} at ${currentTime}`);
           return { message: 'Exit registered successfully', useruuid, entryTime: existingAttendance.entryTime, exitTime: currentTime };
       } else {
@@ -48,7 +46,6 @@ const registerAttendance = async (code, location) => {
           });
 
           await attendance.save();
-          sendNotificationToUser(useruuid, `Entry registered successfully for user at ${currentTime}`);
           console.log(`Entry registered successfully for useruuid=${useruuid} at ${currentTime}`);
           return { message: 'Entry registered successfully', useruuid, entryTime: currentTime };
       }

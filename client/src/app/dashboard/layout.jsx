@@ -3,7 +3,6 @@
 import Brand from "@/components/ui/brand";
 import Header from "@/components/ui/header";
 import Navbar from "@/components/ui/navbar";
-import WebSocketClient from "@/components/component/WebSocketClient";
 
 export default function DashboardLayout({ children }) {
   const titleBrand = "MK Revendedoras";
@@ -21,7 +20,6 @@ export default function DashboardLayout({ children }) {
       <div className="flex flex-col">
         <Header title={titleBrand}></Header>
         <main className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-6">
-          <WebSocketClient />
           {children}
         </main>
       </div>
