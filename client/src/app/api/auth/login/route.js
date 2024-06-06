@@ -36,10 +36,11 @@ export async function POST(req) {
 
             return NextResponse.json(responseData);
         } else {
+            console.log(responseData.error)
             return NextResponse.json({ error: responseData.error }, { status: response.status });
         }
     } catch (error) {
-        console.error('Error during login:', error);
+
         return NextResponse.json({ error: error.message || 'Error during login' }, { status: 500 });
     }
 }

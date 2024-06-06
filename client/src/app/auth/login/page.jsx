@@ -14,6 +14,7 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [showError, setShowError] = useState(false);
+  const [error,setError] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const router = useRouter();
@@ -58,6 +59,7 @@ export default function LoginPage() {
       }, 500);
     } catch (error) {
       console.error("Error during login:", error);
+      setError(error)
       setShowError(true);
     } finally {
       setIsLoading(false);

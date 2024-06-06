@@ -17,10 +17,12 @@ export default function Page() {
   const [currentQR, setCurrentQR] = useState('');
   const router = useRouter();
 
+
   useEffect(() => {
     const fetchZones = async () => {
+      
       try {
-        const response = await fetch(`${NEXT_PUBLIC_URL_API_PRESENTISMO}/api/zones`);
+        const response = await fetch('/api/presentismo/zones');
         const data = await response.json();
         setZones(data);
       } catch (error) {
@@ -36,7 +38,7 @@ export default function Page() {
 
   const handleDelete = async (id) => {
     try {
-      const response = await fetch(`${NEXT_PUBLIC_URL_API_PRESENTISMO}/api/zones/${id}`, {
+      const response = await fetch(`/api/presentismo/zones?id=${id}`, {
         method: 'DELETE',
       });
 
