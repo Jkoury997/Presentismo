@@ -4,7 +4,8 @@ import { Button } from "@/components/ui/button";
 export function UserDropMenu() {
   const handleLogout = async () => {
     try {
-      await logout();
+      const response = await fetch('/api/auth/logout');
+        const data = await response.json();
       // Redireccionar al usuario después de cerrar sesión
       window.location.href = "/auth/login";
     } catch (error) {
