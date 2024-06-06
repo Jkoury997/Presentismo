@@ -6,7 +6,7 @@ const cors = require('cors');
 require('./utils/cronJobs');
 const { errorHandler } = require('./middlewares/errorMiddleware');
 const http = require('http');
-const { initializeSocket } = require('./services/notificationService'); // Importa el módulo de notificaciones
+const { Server } = require('socket.io');
 
 const app = express();
 const PORT = process.env.PORT || 3004;
@@ -21,13 +21,30 @@ app.set('trust proxy', true);
 
 // Crear servidor HTTP y servidor Socket.IO
 const httpServer = http.createServer(app);
-
-// Inicializar Socket.IO
-initializeSocket(httpServer);
+const io = new Server(httpServer, {
+  cors: {
+    origin: '*', // Configura esto según tus necesidades
+    methods: ['GET', 'POST']
+  }
+});
 
 // Conectar a MongoDB y luego iniciar el servidor
 connectDB().then(() => {
     app.use('/api', mainRoute);
+
+    // Configuración de Socket.IO
+    io.on('connection', (socket) => {
+        console.log('New client connected', socket.id);
+
+        socket.on('join', (userId) => {
+            socket.join(userId);
+            console.log(`User ${userId} joined`);
+        });
+
+        socket.on('disconnect', () => {
+            console.log('Client disconnected');
+        });
+    });
 
     httpServer.listen(PORT, () => {
         console.log(`Server running on port ${PORT}`);
