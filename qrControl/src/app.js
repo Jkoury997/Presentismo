@@ -3,10 +3,10 @@ const connectDB = require('./database/db');
 const mainRoute = require('./routes/mainRoute');
 const morgan = require('morgan');
 const cors = require('cors');
-require('./utils/cronJobs'); 
+require('./utils/cronJobs');
 const { errorHandler } = require('./middlewares/errorMiddleware');
-
-
+const http = require('http');
+const { initializeSocket } = require('./services/notificationService'); // Importa el módulo de notificaciones
 
 const app = express();
 const PORT = process.env.PORT || 3004;
@@ -19,11 +19,17 @@ app.use(errorHandler);
 // Configurar trust proxy si estás detrás de un proxy
 app.set('trust proxy', true);
 
+// Crear servidor HTTP y servidor Socket.IO
+const httpServer = http.createServer(app);
+
+// Inicializar Socket.IO
+initializeSocket(httpServer);
+
 // Conectar a MongoDB y luego iniciar el servidor
 connectDB().then(() => {
     app.use('/api', mainRoute);
 
-    app.listen(PORT, () => {
+    httpServer.listen(PORT, () => {
         console.log(`Server running on port ${PORT}`);
     });
 }).catch((error) => {
