@@ -11,8 +11,7 @@ export default function CardEmployed({ employee, employeeDetails }) {
           </div>
         </div>
         <div className="space-y-2 text-center">
-          <h1 className="text-2xl font-bold mb-2 dark:text-gray-200">Employee Profile</h1>
-          <div className="text-lg font-medium dark:text-gray-200">{`${employee.firstName} ${employee.lastName}`}</div>
+          <h1 className="text-2xl font-bold mb-2 dark:text-gray-200">{`${employee.firstName} ${employee.lastName}`}</h1>
           <div className="text-gray-500 dark:text-gray-400">{employee.email}</div>
           <div className="text-gray-500 dark:text-gray-400">{employee.dni}</div>
           <div className="text-gray-500 dark:text-gray-400">Clocked in at {new Date(employeeDetails.entryTime).toLocaleTimeString()}</div>

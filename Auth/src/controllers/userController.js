@@ -3,11 +3,11 @@ const { registerUser,loginUser,getClientIp,logoutUser,getUserService,getUserByEm
 const { generateAccessToken, generateRefreshToken,revokeTokens} = require('../services/tokenService');
 
 
-
 const register = async (req, res) => {
     try {
         const { firstName, lastName, dni, email, password } = req.body;
-        const { user, deviceUUID } = await registerUser({ firstName, lastName, dni, email, password });
+        const role = 'employed'; // Rol por defecto
+        const { user, deviceUUID } = await registerUser({ firstName, lastName, dni, email, password, role });
         res.status(201).json({ message: 'User registered successfully', user, deviceUUID });
     } catch (error) {
         res.status(400).json({ error: error.message });
@@ -19,9 +19,16 @@ const login = async (req, res) => {
     try {
         const { email, password, deviceUUID } = req.body;
         const user = await loginUser(email, password, deviceUUID);
+        console.log(user)
+        if (!user) {
+            return res.status(400).json({ error: 'Invalid credentials' });
+        }
+
         const ip = getClientIp(req);
-        const accessToken = await generateAccessToken(user._id, user.uuid);
-        const refreshToken = await generateRefreshToken(user.uuid, ip);
+        const role = user.role; // Asumiendo que el rol está en el usuario
+        console.log(role)
+        const accessToken = await generateAccessToken(user._id, user.uuid, role);
+        const refreshToken = await generateRefreshToken(user.uuid, role, ip);
 
         res.status(200).json({ user, accessToken, refreshToken });
     } catch (error) {

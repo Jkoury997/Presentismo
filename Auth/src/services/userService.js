@@ -2,6 +2,7 @@
 const User = require('../database/models/User');
 const Token = require('../database/models/Token');
 const Device = require("../database/models/Device")
+const UserRole = require('../database/models/UserRole');
 const bcrypt = require("bcryptjs")
 const { v4: uuidv4 } = require('uuid');
 
@@ -10,71 +11,80 @@ const LOCK_TIME = 15 * 60 * 1000; // 15 minutos
 
 
 const registerUser = async (userData) => {
-    const { firstName, lastName, dni, email, password } = userData;
-  
-    // Verificar si el email o el DNI ya existen
-    const existingUserByEmail = await User.findOne({ email });
-    if (existingUserByEmail) {
+  const { firstName, lastName, dni, email, password, role = 'employed' } = userData;
+
+  // Verificar si el email o el DNI ya existen
+  const existingUserByEmail = await User.findOne({ email });
+  if (existingUserByEmail) {
       throw new Error('User with this email already exists');
-    }
-  
-    const existingUserByDni = await User.findOne({ dni });
-    if (existingUserByDni) {
+  }
+
+  const existingUserByDni = await User.findOne({ dni });
+  if (existingUserByDni) {
       throw new Error('User with this DNI already exists');
-    }
-  
-    // Crear un nuevo usuario
-    const user = new User({ firstName, lastName, dni, email, password });
-    await user.save();
-  
-    // Generar un UUID para el dispositivo
-    const deviceUUID = uuidv4();
-  
-    // Crear un nuevo dispositivo vinculado al usuario
-    const device = new Device({ useruuid: user.uuid, uuid: deviceUUID });
-    await device.save();
-  
-    return { user, deviceUUID };
-  };
+  }
 
+  // Crear un nuevo usuario
+  const user = new User({ firstName, lastName, dni, email, password });
+  await user.save();
 
-  const loginUser = async (email, password, deviceUUID) => {
-    const user = await User.findOne({ email });
-  
-    if (!user) {
+  // Generar un UUID para el dispositivo
+  const deviceUUID = uuidv4();
+
+  // Crear un nuevo dispositivo vinculado al usuario
+  const device = new Device({ useruuid: user.uuid, uuid: deviceUUID });
+  await device.save();
+
+  // Asignar rol al usuario
+  const userRole = new UserRole({ userUUID: user.uuid, roles: [role] });
+  await userRole.save();
+
+  return { user, deviceUUID };
+};
+
+const loginUser = async (email, password, deviceUUID) => {
+  const user = await User.findOne({ email });
+
+  if (!user) {
       throw new Error('User not found');
-    }
-  
-    if (user.lockUntil && user.lockUntil > Date.now()) {
+  }
+
+  if (user.lockUntil && user.lockUntil > Date.now()) {
       throw new Error(`Account is locked until ${user.lockUntil}`);
-    }
-  
-    const isMatch = await bcrypt.compare(password, user.password);
-  
-    if (!isMatch) {
+  }
+
+  const isMatch = await bcrypt.compare(password, user.password);
+
+  if (!isMatch) {
       user.failedLoginAttempts += 1;
       if (user.failedLoginAttempts >= MAX_FAILED_ATTEMPTS) {
-        user.lockUntil = Date.now() + LOCK_TIME;
-        user.failedLoginAttempts = 0;
+          user.lockUntil = Date.now() + LOCK_TIME;
+          user.failedLoginAttempts = 0;
       }
       await user.save();
       throw new Error('Invalid password');
-    }
-  
-    user.failedLoginAttempts = 0;
-    user.lockUntil = undefined;
-    await user.save();
-  
-    const device = await Device.findOne({ useruuid: user.uuid, uuid: deviceUUID });
-    if (!device) {
+  }
+
+  user.failedLoginAttempts = 0;
+  user.lockUntil = undefined;
+  await user.save();
+
+  const device = await Device.findOne({ useruuid: user.uuid, uuid: deviceUUID });
+  if (!device) {
       throw new Error('Invalid device');
-    }
-  
-    const userWithoutPassword = user.toObject();
-    delete userWithoutPassword.password;
-  
-    return userWithoutPassword;
-  };
+  }
+
+  // Buscar el rol del usuario
+  const userRole = await UserRole.findOne({ userUUID: user.uuid });
+  if (!userRole) {
+      throw new Error('User role not found');
+  }
+
+  const userWithoutPassword = user.toObject();
+  delete userWithoutPassword.password;
+
+  return { ...userWithoutPassword, role: userRole.roles[0] }; // Asumiendo que el usuario tiene un solo rol
+};
 
 const getClientIp = (req) => {
     const xForwardedFor = req.headers['x-forwarded-for'];

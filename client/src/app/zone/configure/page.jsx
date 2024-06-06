@@ -2,12 +2,19 @@
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { InfoIcon, LocateIcon, QrCodeIcon, TagIcon } from "lucide-react";
+import QRScanner from "@/components/component/QRScanner";
+
+const NEXT_PUBLIC_URL_API_AUTH = process.env.NEXT_PUBLIC_URL_API_AUTH
+const NEXT_PUBLIC_URL_API_PRESENTISMO = process.env.NEXT_PUBLIC_URL_API_PRESENTISMO
 
 export default function Page() {
   const [message, setMessage] = useState('');
   const [zoneUUID, setZoneUUID] = useState('');
+  const [error, setError] = useState(null);
   const router = useRouter();
   const inputRef = useRef(null);
+  const qrLinkSectionRef = useRef(null);
+  const [isLinkingNewQR, setIsLinkingNewQR] = useState(false);
 
   useEffect(() => {
     const deviceUUID = localStorage.getItem('deviceUUID');
@@ -26,7 +33,7 @@ export default function Page() {
       if (data) {
         try {
           // Enviar la solicitud de vinculación del dispositivo al backend
-          const response = await fetch('http://localhost:3004/api/zones/link-device', {
+          const response = await fetch(`${NEXT_PUBLIC_URL_API_PRESENTISMO}/api/zones/link-device`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -65,6 +72,52 @@ export default function Page() {
     }
   };
 
+  useEffect(() => {
+    if (isLinkingNewQR && qrLinkSectionRef.current) {
+      qrLinkSectionRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [isLinkingNewQR]);
+
+  const handleScan = async (data) => {
+    if (data) {
+      const qrGeneralUUID = data.text;
+      setZoneUUID(qrGeneralUUID);
+      try {
+        const response = await fetch('http://localhost:3004/api/zones/link-device', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ zoneUUID: qrGeneralUUID }),
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to configure device');
+        }
+
+        const responseData = await response.json();
+        const { deviceUUID } = responseData;
+
+        localStorage.setItem('deviceUUID', deviceUUID);
+        localStorage.setItem('zoneUUID', qrGeneralUUID);
+        document.cookie = `deviceUUID=${deviceUUID}; path=/`;
+        document.cookie = `zoneUUID=${qrGeneralUUID}; path=/`;
+
+        setZoneUUID(qrGeneralUUID);
+        setMessage(`Device configured for zone: ${qrGeneralUUID}`);
+
+        router.push('/zone/reader'); // Redirect to reader after configuration
+      } catch (err) {
+        setError("Error al realizar la acción con el UUID. Por favor, intenta nuevamente.");
+      }
+    }
+  };
+
+  const handleError = (err) => {
+    console.error(err);
+    setError("Error al escanear el código QR. Por favor, intenta nuevamente.");
+  };
+
   return (
     <div className="flex flex-col items-center justify-center h-screen bg-gray-100 dark:bg-gray-900">
       <div className="max-w-md w-full p-6 bg-white rounded-lg shadow-md dark:bg-gray-800">
@@ -72,7 +125,12 @@ export default function Page() {
           <h1 className="text-2xl font-bold">Configure Your Zone</h1>
           <p className="text-gray-500 dark:text-gray-400">Scan the QR code to set up your zone.</p>
           <div className="flex items-center justify-center p-8 bg-gray-100 rounded-lg dark:bg-gray-700">
-            <QrCodeIcon className="w-24 h-24 text-gray-500 dark:text-gray-400" />
+            <QRScanner
+              ref={qrLinkSectionRef}
+              error={error}
+              handleScan={handleScan}
+              handleError={handleError}
+            />
             <input
               type="text"
               ref={inputRef}

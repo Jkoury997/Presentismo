@@ -1,13 +1,12 @@
 const jwt = require('jsonwebtoken');
 const Token = require('../database/models/Token');
 
-
-const generateAccessToken = (id,uuid) => {
-    return jwt.sign({ id,uuid }, process.env.JWT_SECRET, { expiresIn: '1h' });
+const generateAccessToken = (id, uuid, role) => {
+    return jwt.sign({ id, uuid, role }, process.env.JWT_SECRET, { expiresIn: '1h' });
 };
 
-const generateRefreshToken = async (id, ip) => {
-    const token = jwt.sign({ id }, process.env.JWT_REFRESH_SECRET, { expiresIn: '30d' });
+const generateRefreshToken = async (id, role, ip) => {
+    const token = jwt.sign({ id, role }, process.env.JWT_REFRESH_SECRET, { expiresIn: '30d' });
     const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // 30 días
     await Token.create({ token, userUuid: id, ip, expiresAt });
     return token;
@@ -37,3 +36,4 @@ const verifyRefreshToken = async (token) => {
 };
 
 module.exports = { generateAccessToken, generateRefreshToken, revokeTokens, verifyRefreshToken };
+
