@@ -4,14 +4,20 @@ import 'react-toastify/dist/ReactToastify.css';
 import { Button } from "@/components/ui/button";
 import { XIcon, BellIcon } from 'lucide-react';
 
-const NEXT_PUBLIC_URL_WEBSOCKET = '/api/websocket'; // Endpoint de tu servidor Next.js
+const NEXT_PUBLIC_URL_WEBSOCKET = `ws://${process.env.NEXT_PUBLIC_WEBSOCKET_HOST}:${process.env.NEXT_PUBLIC_WEBSOCKET_PORT}`;
 
 const WebSocketClient = () => {
   const socketRef = useRef(null);
 
   useEffect(() => {
     const connectWebSocket = () => {
-      const socket = new WebSocket(NEXT_PUBLIC_URL_WEBSOCKET); 
+      const accessToken = localStorage.getItem('accessToken');
+      if (!accessToken) {
+        console.error('Token not found');
+        return;
+      }
+
+      const socket = new WebSocket(NEXT_PUBLIC_URL_WEBSOCKET, accessToken);
       socketRef.current = socket;
 
       socket.onopen = () => {
