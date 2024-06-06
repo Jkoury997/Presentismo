@@ -4,54 +4,59 @@ const { sendNotification } = require('./webSocketService');
 
 const TIME_INTERVAL = 1 * 60 * 1000; // 1 minuto
 
-const registerAttendance = async (code, location) => {
-    const currentTime = new Date();
 
-    // Verificar si el código QR es válido y obtener el useruuid
-    const qrCode = await QRCode.findOne({ code });
-    if (!qrCode) {
+const registerAttendance = async (code, location) => {
+    try {
+      const currentTime = new Date();
+  
+      // Verificar si el código QR es válido y obtener el useruuid
+      const qrCode = await QRCode.findOne({ code });
+      if (!qrCode) {
         console.error(`Invalid QR code: ${code}`);
         throw new Error('Invalid QR code');
-    }
-
-    const { useruuid, deviceUUID } = qrCode;
-    console.log(`QR code valid: useruuid=${useruuid}, deviceUUID=${deviceUUID}`);
-
-    // Verificar si el usuario ya tiene una sesión abierta
-    const existingAttendance = await Attendance.findOne({ useruuid, deviceUUID, exitTime: null });
-
-    if (existingAttendance) {
+      }
+  
+      const { useruuid, deviceUUID } = qrCode;
+      console.log(`QR code valid: useruuid=${useruuid}, deviceUUID=${deviceUUID}`);
+  
+      // Verificar si el usuario ya tiene una sesión abierta
+      const existingAttendance = await Attendance.findOne({ useruuid, deviceUUID, exitTime: null });
+  
+      if (existingAttendance) {
         const lastEntryTime = new Date(existingAttendance.entryTime);
         console.log(`Existing attendance found: useruuid=${useruuid}, entryTime=${lastEntryTime}`);
-
+  
         // Verificar el intervalo de tiempo mínimo entre las lecturas
         if (currentTime - lastEntryTime < TIME_INTERVAL) {
-            console.error(`Cannot register another entry/exit within 1 minute for useruuid=${useruuid}`);
-            throw new Error('Cannot register another entry/exit within 1 minute');
+          console.error(`Cannot register another entry/exit within 1 minute for useruuid=${useruuid}`);
+          throw new Error('Cannot register another entry/exit within 1 minute');
         }
-
+  
         // Registrar la salida
         existingAttendance.exitTime = currentTime;
         await existingAttendance.save();
         sendNotification(`Exit registered successfully for user at ${currentTime}`);
         console.log(`Exit registered successfully for useruuid=${useruuid} at ${currentTime}`);
         return { message: 'Exit registered successfully', useruuid, entryTime: existingAttendance.entryTime, exitTime: currentTime };
-    } else {
+      } else {
         // Registrar la entrada
         const attendance = new Attendance({
-            useruuid,
-            deviceUUID,
-            entryTime: currentTime,
-            location,
+          useruuid,
+          deviceUUID,
+          entryTime: currentTime,
+          location,
         });
-
+  
         await attendance.save();
         sendNotification(`Entry registered successfully for user at ${currentTime}`);
         console.log(`Entry registered successfully for useruuid=${useruuid} at ${currentTime}`);
         return { message: 'Entry registered successfully', useruuid, entryTime: currentTime };
+      }
+    } catch (error) {
+      console.error('Error registering attendance:', error);
+      throw new Error('Error registering attendance');
     }
-};
-
+  };
 // Cerrar sesiones abiertas automáticamente después de 14 horas
 const closeAutomaticSessions = async () => {
     const threshold = new Date(Date.now() - 14 * 60 * 60 * 1000);
