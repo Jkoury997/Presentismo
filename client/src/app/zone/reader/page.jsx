@@ -1,11 +1,9 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import CardEmployed from "@/components/component/card-employed";
 import { useRouter } from "next/navigation";
 import QRScanner from "@/components/component/QRScanner";
 
-const NEXT_PUBLIC_URL_API_AUTH = process.env.NEXT_PUBLIC_URL_API_AUTH
-const NEXT_PUBLIC_URL_API_PRESENTISMO = process.env.NEXT_PUBLIC_URL_API_PRESENTISMO
 
 export default function Reader() {
   const [employeeDetails, setEmployeeDetails] = useState(null);
@@ -15,6 +13,7 @@ export default function Reader() {
   const [lastScannedCode, setLastScannedCode] = useState(null);
   const [scanning, setScanning] = useState(false); // Estado para controlar el escaneo
   const router = useRouter();
+  const scannerRef = useRef(null); // Referencia al componente QRScanner
 
   useEffect(() => {
     const zoneUUID = localStorage.getItem('zoneUUID');
@@ -83,8 +82,12 @@ export default function Reader() {
       } catch (error) {
         console.error('Error checking in employee:', error);
         setMessage('Error checking in employee');
+        setScanning(false);
       } finally {
-        setScanning(false); // Permitir nuevos escaneos
+        // Permitir nuevos escaneos después de 3 segundos
+        setTimeout(() => {
+          setScanning(false);
+        }, 600);
       }
     }
   };
@@ -101,6 +104,7 @@ export default function Reader() {
         <p className="text-gray-500 dark:text-gray-400">Scan the QR code to check in.</p>
         <div className="flex items-center justify-center p-1 bg-gray-100 rounded-lg dark:bg-gray-700">
           <QRScanner
+            ref={scannerRef} // Referencia al componente QRScanner
             error={error}
             handleScan={handleScan}
             handleError={handleError}

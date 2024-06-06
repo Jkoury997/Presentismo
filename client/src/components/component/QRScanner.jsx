@@ -1,4 +1,4 @@
-import React, { forwardRef, useState, useEffect } from "react";
+import React, { forwardRef, useState, useEffect, useImperativeHandle } from "react";
 import dynamic from "next/dynamic";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { TriangleAlertIcon } from "lucide-react";
@@ -9,6 +9,7 @@ const QrScanner = dynamic(() => import("react-qr-scanner"), { ssr: false });
 const QRScanner = forwardRef(({ error, handleScan, handleError }, ref) => {
   const [isSupported, setIsSupported] = useState(true);
   const [permissionGranted, setPermissionGranted] = useState(true);
+  const [scannerKey, setScannerKey] = useState(0);
 
   useEffect(() => {
     // Verificar la compatibilidad de getUserMedia
@@ -26,6 +27,12 @@ const QRScanner = forwardRef(({ error, handleScan, handleError }, ref) => {
         });
     }
   }, []);
+
+  useImperativeHandle(ref, () => ({
+    resetScanner: () => {
+      setScannerKey(prevKey => prevKey + 1); // Reiniciar el escáner cambiando la key
+    }
+  }));
 
   const previewStyle = {
     height: 300,
@@ -68,6 +75,7 @@ const QRScanner = forwardRef(({ error, handleScan, handleError }, ref) => {
           </Alert>
         ) : (
           <QrScanner
+            key={scannerKey} // Cambiar la key reiniciará el componente
             delay={300}
             style={previewStyle}
             onError={handleError}
