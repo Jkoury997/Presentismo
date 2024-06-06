@@ -4,9 +4,6 @@ import { useRouter } from "next/navigation";
 import { InfoIcon, LocateIcon, QrCodeIcon, TagIcon } from "lucide-react";
 import QRScanner from "@/components/component/QRScanner";
 
-const NEXT_PUBLIC_URL_API_AUTH = process.env.NEXT_PUBLIC_URL_API_AUTH
-const NEXT_PUBLIC_URL_API_PRESENTISMO = process.env.NEXT_PUBLIC_URL_API_PRESENTISMO
-
 export default function Page() {
   const [message, setMessage] = useState('');
   const [zoneUUID, setZoneUUID] = useState('');
@@ -27,51 +24,6 @@ export default function Page() {
     }
   }, [router]);
 
-  const handleKeyPress = async (e) => {
-    if (e.key === 'Enter') {
-      const data = e.target.value.trim();
-      if (data) {
-        try {
-          // Enviar la solicitud de vinculación del dispositivo al backend
-          const response = await fetch(`${NEXT_PUBLIC_URL_API_PRESENTISMO}/api/zones/link-device`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ zoneUUID: data }),
-          });
-
-          if (!response.ok) {
-            throw new Error('Failed to configure device');
-          }
-
-          const responseData = await response.json();
-          const { deviceUUID } = responseData;
-
-          localStorage.setItem('deviceUUID', deviceUUID);
-          localStorage.setItem('zoneUUID', data);
-          document.cookie = `deviceUUID=${deviceUUID}; path=/`;
-          document.cookie = `zoneUUID=${data}; path=/`;
-
-          setZoneUUID(data);
-          setMessage(`Device configured for zone: ${data}`);
-          
-          // Mostrar la información de la zona
-          const zoneInfo = document.getElementById("zone-info");
-          zoneInfo.querySelector("#zone-address").textContent = data; // Asumiendo que el nombre de la zona está en zoneUUID para este ejemplo
-          zoneInfo.querySelector("#zone-name").textContent = data;
-          zoneInfo.querySelector("#zone-description").textContent = "Descripción de la zona"; // Placeholder
-          zoneInfo.classList.remove("hidden");
-
-          router.push('/zone/reader'); // Redirect to reader after configuration
-        } catch (error) {
-          console.error('Error configuring device:', error);
-          setMessage('Error configuring device');
-        }
-      }
-    }
-  };
-
   useEffect(() => {
     if (isLinkingNewQR && qrLinkSectionRef.current) {
       qrLinkSectionRef.current.scrollIntoView({ behavior: 'smooth' });
@@ -83,7 +35,7 @@ export default function Page() {
       const qrGeneralUUID = data.text;
       setZoneUUID(qrGeneralUUID);
       try {
-        const response = await fetch('http://localhost:3004/api/zones/link-device', {
+        const response = await fetch('/api/presentismo/zones/configure', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -130,13 +82,6 @@ export default function Page() {
               error={error}
               handleScan={handleScan}
               handleError={handleError}
-            />
-            <input
-              type="text"
-              ref={inputRef}
-              onKeyPress={handleKeyPress}
-              className="opacity-0 absolute"
-              autoFocus
             />
           </div>
           {message && (

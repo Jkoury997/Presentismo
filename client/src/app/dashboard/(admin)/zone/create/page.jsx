@@ -17,7 +17,7 @@ export default function Page() {
 
   const handleCreateZone = async () => {
     try {
-      const response = await fetch(`${NEXT_PUBLIC_URL_API_PRESENTISMO}/api/zones`, {
+      const response = await fetch(`/api/presentismo/zones/create`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
