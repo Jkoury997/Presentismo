@@ -2,6 +2,8 @@
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 
+const NEXT_PUBLIC_URL_API_PRESENTISMO = process.env.NEXT_PUBLIC_URL_API_PRESENTISMO
+
 export async function POST(req) {
     const body = await req.json();
   const cookieStore = cookies();
