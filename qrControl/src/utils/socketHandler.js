@@ -1,4 +1,3 @@
-// socketHandler.js
 const users = {};
 
 const socketHandler = (io) => {

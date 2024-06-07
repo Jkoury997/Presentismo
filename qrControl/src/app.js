@@ -15,14 +15,22 @@ const PORT = process.env.PORT || 3004;
 // Middleware
 app.use(express.json());
 app.use(morgan('dev'));
-app.use(cors());
+app.use(cors()); // Permitir cualquier origen
 app.use(errorHandler);
 
 // Configurar trust proxy si estás detrás de un proxy
 app.set('trust proxy', true);
 
+// Crear servidor HTTP
 let server = http.createServer(app);
-let io = socketIO(server);
+
+// Configurar Socket.IO con CORS permitido para cualquier origen
+let io = socketIO(server, {
+    cors: {
+        origin: "*", // Permitir cualquier origen
+        methods: ["GET", "POST"]
+    }
+});
 
 // Usar el manejador de Socket.IO
 socketHandler(io);
