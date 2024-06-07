@@ -65,7 +65,7 @@ export default function Page() {
 
   const handleAdd = () => {
     // Implement add functionality
-    router.push('/dashboard/zone/create');
+    router.push('/dashboard/admin/zone/create');
   };
 
   if (loading) return <p>Loading...</p>;

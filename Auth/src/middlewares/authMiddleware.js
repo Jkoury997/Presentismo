@@ -1,33 +1,30 @@
 const jwt = require('jsonwebtoken');
-const UserRole = require('../database/models/UserRole');
 
-// Middleware para proteger rutas y verificar roles
-const protect = (roles = []) => {
-  return async (req, res, next) => {
-    let token;
+// Middleware para verificar el token
+const verifyToken = (req, res, next) => {
+  const token = req.header('Authorization');
+  if (!token) return res.status(401).json({ message: 'Access denied. No token provided.' });
 
-    if (req.headers.authorization && req.headers.authorization.startsWith('Bearer ')) {
-      try {
-        token = req.headers.authorization.split(' ')[1];
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        req.user = decoded;
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    req.user = decoded;
+    next();
+  } catch (ex) {
+    res.status(400).json({ message: 'Invalid token.' });
+  }
+};
 
-        // Verificar roles si se especificaron
-        if (roles.length > 0) {
-          const userRoles = await UserRole.findOne({ userUUID: decoded.userUUID });
-          if (!userRoles || !roles.some(role => userRoles.roles.includes(role))) {
-            return res.status(403).json({ message: 'Access denied, insufficient role' });
-          }
-        }
-
-        next();
-      } catch (error) {
-        return res.status(401).json({ message: 'Not authorized, token failed' });
-      }
-    } else {
-      return res.status(401).json({ message: 'Not authorized, no token' });
+// Middleware para autorizar roles
+const authorizeRoles = (...roles) => {
+  return (req, res, next) => {
+    if (!roles.includes(req.user.role)) {
+      return res.status(403).json({ message: 'Access denied, insufficient role' });
     }
+    next();
   };
 };
 
-module.exports = { protect };
+module.exports = {
+  verifyToken,
+  authorizeRoles
+};

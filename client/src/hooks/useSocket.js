@@ -1,6 +1,7 @@
-// hooks/useSocket.js
 import { useEffect } from 'react';
 import io from 'socket.io-client';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const useSocket = (userID) => {
     useEffect(() => {
@@ -12,8 +13,16 @@ const useSocket = (userID) => {
         // Escucha el evento de notificación
         socket.on('notification', (data) => {
             console.log('Notificación recibida:', data);
-            // Aquí puedes mostrar la notificación al usuario
-            alert('Notificación: ' + data.message);
+            toast.success(data.message, {
+                position: toast.POSITION.TOP_RIGHT,
+                autoClose: 5000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: "colored",
+            });
         });
 
         return () => {

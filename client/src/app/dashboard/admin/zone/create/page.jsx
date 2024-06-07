@@ -29,7 +29,7 @@ export default function Page() {
 
       if (response.ok) {
         setMessage('Zona creada exitosamente');
-        router.push('/dashboard/zone'); // Redirigir a la página principal o a otra página adecuada
+        router.push('/dashboard/admin/zone'); // Redirigir a la página principal o a otra página adecuada
       } else {
         setMessage(`Error: ${data.error}`);
       }

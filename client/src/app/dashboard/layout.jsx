@@ -1,10 +1,9 @@
 'use client';
 
-import { useEffect } from 'react';
-import socketIOClient from 'socket.io-client';
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
 import Cookies from 'js-cookie';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import useSocket from '@/hooks/useSocket';
 import Brand from "@/components/ui/brand";
 import Header from "@/components/ui/header";
 import Navbar from "@/components/ui/navbar";
@@ -12,24 +11,11 @@ import Navbar from "@/components/ui/navbar";
 export default function DashboardLayout({ children }) {
   const titleBrand = "MK Revendedoras";
 
-  useEffect(() => {
-    const socket = socketIOClient('https://fichaqui.online'); // Ajusta la URL según sea necesario
+  // Obtén el useruuid desde la cookie
+  const useruuid = Cookies.get('useruuid');
 
-    // Obtén el useruuid desde la cookie
-    const useruuid = Cookies.get('useruuid');
-    if (useruuid) {
-      socket.emit('join', useruuid);
-    }
-
-    socket.on('notification', (message) => {
-      console.log('Notification received:', message);
-      toast.info(message);
-    });
-
-    return () => {
-      socket.disconnect();
-    };
-  }, []);
+  // Usa el hook personalizado para conectarte al socket
+  useSocket(useruuid);
 
   return (
     <div key="1" className="grid min-h-screen w-full overflow-hidden lg:grid-cols-[280px_1fr]">
