@@ -4,7 +4,7 @@ import io from 'socket.io-client';
 
 const useSocket = (userID) => {
     useEffect(() => {
-        const socket = io('http://fichaqui.online'); // Cambia esto a la URL de tu servidor
+        const socket = io('https://fichaqui.online'); // Cambia esto a la URL de tu servidor
 
         // Registra el userID con el servidor
         socket.emit('register', userID);

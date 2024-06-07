@@ -13,7 +13,7 @@ export default function DashboardLayout({ children }) {
   const titleBrand = "MK Revendedoras";
 
   useEffect(() => {
-    const socket = socketIOClient('http://fichaqui.online'); // Ajusta la URL según sea necesario
+    const socket = socketIOClient('https://fichaqui.online'); // Ajusta la URL según sea necesario
 
     // Obtén el useruuid desde la cookie
     const useruuid = Cookies.get('useruuid');
