@@ -13,7 +13,7 @@ export default function DashboardLayout({ children }) {
   const titleBrand = "MK Revendedoras";
 
   useEffect(() => {
-    const socket = socketIOClient('http://localhost:8080'); // Ajusta la URL según sea necesario
+    const socket = socketIOClient('http://localhost:3004'); // Ajusta la URL según sea necesario
 
     // Obtén el useruuid desde la cookie
     const useruuid = Cookies.get('useruuid');
@@ -23,7 +23,7 @@ export default function DashboardLayout({ children }) {
 
     socket.on('notification', (message) => {
       console.log('Notification received:', message);
-      toast(message);
+      toast.info(message);
     });
 
     return () => {

@@ -1,10 +1,10 @@
 const Attendance = require('../database/models/Attendace');
 const QRCode = require('../database/models/QRCode');
-const { sendNotification } = require('./notificationService'); // Importa la función de notificaciones
+const { sendNotification } = require('../utils/socketHandler'); // Asegúrate de que esta ruta sea correcta
 
 const TIME_INTERVAL = 1 * 60 * 1000; // 1 minuto
 
-const registerAttendance = async (code, location) => {
+const registerAttendance = async (code, location, io) => { // Agregamos io como parámetro
   try {
     const currentTime = new Date();
 
@@ -36,9 +36,10 @@ const registerAttendance = async (code, location) => {
       await existingAttendance.save();
       console.log(`Exit registered successfully for useruuid=${useruuid} at ${currentTime}`);
       
-      // Enviar notificación
-      sendNotification(useruuid, 'Your exit has been registered successfully');
-      
+      // Enviar notificación de salida
+      const message = `Salida registrada: ${currentTime}`;
+      sendNotification(useruuid, message, io);
+
       return { message: 'Exit registered successfully', useruuid, entryTime: existingAttendance.entryTime, exitTime: currentTime };
     } else {
       // Registrar la entrada
@@ -52,9 +53,10 @@ const registerAttendance = async (code, location) => {
       await attendance.save();
       console.log(`Entry registered successfully for useruuid=${useruuid} at ${currentTime}`);
       
-      // Enviar notificación
-      sendNotification(useruuid, 'Your entry has been registered successfully');
-      
+      // Enviar notificación de entrada
+      const message = `Entrada registrada: ${currentTime}`;
+      sendNotification(useruuid, message, io);
+
       return { message: 'Entry registered successfully', useruuid, entryTime: currentTime };
     }
   } catch (error) {
