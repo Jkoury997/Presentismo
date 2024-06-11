@@ -16,7 +16,6 @@ const generateOtp = async (userUuid, email) => {
     const expiresAt = new Date(Date.now() + 300000); // 5 minutos en milisegundos
 
     await Otp.create({ otp, userUuid, email, expiresAt });
-
     return otp;
 };
 
@@ -25,7 +24,7 @@ const sendOtpEmail = async (email, otp) => {
     let HtmlTemplateWithOtp = htmlTemplate.replace('{{otpCode}}', otp);
     const transporter = nodemailer.createTransport({
         host: process.env.SMTP_HOST, // El servidor SMTP proporcionado
-        port: 465, // El puerto SMTP para SSL
+        port: process.env.SMTP_PORT, // El puerto SMTP para SSL
         secure: true, // true para una conexión segura SSL
         auth: {
             user: process.env.SMTP_USERNAME,
@@ -50,6 +49,7 @@ const sendOtpEmail = async (email, otp) => {
 
 const verifyOtp = async (userUuid, otp) => {
     const otpRecord = await Otp.findOne({ userUuid, otp });
+    console.log(otpRecord)
 
     if (!otpRecord) {
         throw new Error('Invalid OTP');

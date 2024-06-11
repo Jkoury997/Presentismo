@@ -9,7 +9,7 @@ import Header from "@/components/ui/header";
 import Navbar from "@/components/ui/navbar";
 
 export default function DashboardLayout({ children }) {
-  const titleBrand = "MK Revendedoras";
+  const titleBrand = "FichAqui";
 
   // Obtén el useruuid desde la cookie
   const useruuid = Cookies.get('useruuid');

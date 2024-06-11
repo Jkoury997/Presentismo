@@ -84,11 +84,37 @@ async function getUser(req, res) {
     }
   }
 
+
+const updateUser = async (req, res) => {
+    const useruuid = req.params.uuid;
+    const updateData = req.body;
+
+    try {
+        const updatedUser = await userService.updateUser(useruuid, updateData);
+        res.status(200).json({ message: 'Usuario actualizado', user: updatedUser });
+    } catch (error) {
+        res.status(400).json({ message: error.message });
+    }
+};
+
+const deactivateUser = async (req, res) => {
+    const useruuid = req.params.uuid;
+
+    try {
+        const deactivatedUser = await userService.deactivateUser(useruuid);
+        res.status(200).json({ message: 'Usuario desactivado', user: deactivatedUser });
+    } catch (error) {
+        res.status(400).json({ message: error.message });
+    }
+};
+
 module.exports = {
     register,
     login,
     logout,
     revokeAllTokens,
     getUser,
-    getUserByEmail
+    getUserByEmail,
+    updateUser,
+    deactivateUser
 };

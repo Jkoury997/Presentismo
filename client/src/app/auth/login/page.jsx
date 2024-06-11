@@ -92,7 +92,7 @@ export default function LoginPage() {
             <div className="relative">
               <div className="flex items-center justify-between">
                 <Label htmlFor="password">Password</Label>
-                <Link className="text-sm underline" href="#">
+                <Link className="text-sm underline" href="/auth/recovery">
                   Forgot your password?
                 </Link>
               </div>
@@ -103,6 +103,9 @@ export default function LoginPage() {
                 type={showPassword ? "text" : "password"}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                required={true}
+                current-password="true"
+                autoComplete="true"
               />
               <Button
                 className="absolute bottom-1 right-1 h-7 w-7"
@@ -136,7 +139,7 @@ export default function LoginPage() {
           </form>
           <div className="text-center text-sm text-gray-500 dark:text-gray-400">
             Don't have an account?
-            <Link className="font-medium underline" href="/register">
+            <Link className="font-medium underline" href="/auth/register">
               Sign up
             </Link>
           </div>

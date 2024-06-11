@@ -1,3 +1,4 @@
+
 const { generateOtp, sendOtpEmail, verifyOtp } = require('../services/otpService');
 const { revokeTokens} = require('../services/tokenService');
 const User = require('../database/models/User');
@@ -6,8 +7,8 @@ const User = require('../database/models/User');
 const requestOtp = async (req, res) => {
     try {
         const { email } = req.body;
-        const user = await User.findOne({ email });
 
+        const user = await User.findOne({ email });
         if (!user) {
             return res.status(404).json({ error: 'User not found' });
         }

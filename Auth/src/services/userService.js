@@ -120,6 +120,32 @@ async function getUserService(uuid) {
     }
     return user;
   }
+
+  const updateUser = async (userUuid, updateData) => {
+    try {
+        const updatedUser = await User.findOneAndUpdate({ uuid: userUuid }, updateData, { new: true, runValidators: true });
+        if (!updatedUser) {
+            throw new Error('Usuario no encontrado');
+        }
+        return updatedUser;
+    } catch (error) {
+        throw new Error(`Error al actualizar el usuario: ${error.message}`);
+    }
+};
+
+const deactivateUser = async (userUuid) => {
+    try {
+        const user = await User.findOne({ uuid: userUuid });
+        if (!user) {
+            throw new Error('Usuario no encontrado');
+        }
+        user.active = false;
+        await user.save();
+        return user;
+    } catch (error) {
+        throw new Error(`Error al desactivar el usuario: ${error.message}`);
+    }
+};
   
 
 module.exports = {
@@ -128,5 +154,7 @@ module.exports = {
     getClientIp,
     logoutUser,
     getUserService,
-    getUserByEmailService
+    getUserByEmailService,
+    updateUser,
+    deactivateUser
 };

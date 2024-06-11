@@ -3,9 +3,11 @@ import io from 'socket.io-client';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
+const NEXT_PUBLIC_URL_WEBSOCKET = process.env.NEXT_PUBLIC_URL_WEBSOCKET
+
 const useSocket = (userID) => {
     useEffect(() => {
-        const socket = io('https://fichaqui.online'); // Cambia esto a la URL de tu servidor
+        const socket = io(NEXT_PUBLIC_URL_WEBSOCKET); // Cambia esto a la URL de tu servidor
 
         // Registra el userID con el servidor
         socket.emit('register', userID);
