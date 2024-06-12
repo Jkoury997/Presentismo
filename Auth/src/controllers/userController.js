@@ -5,9 +5,9 @@ const { generateAccessToken, generateRefreshToken,revokeTokens} = require('../se
 
 const register = async (req, res) => {
     try {
-        const { firstName, lastName, dni, email, password } = req.body;
+        const { firstName, lastName, dni, email, password,sex } = req.body;
         const role = 'employed'; // Rol por defecto
-        const { user, deviceUUID } = await registerUser({ firstName, lastName, dni, email, password, role });
+        const { user, deviceUUID } = await registerUser({ firstName, lastName, dni, email, password, role,sex });
         res.status(201).json({ message: 'User registered successfully', user, deviceUUID });
     } catch (error) {
         res.status(400).json({ error: error.message });

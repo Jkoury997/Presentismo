@@ -10,7 +10,8 @@ const userSchema = new mongoose.Schema({
     password: { type: String, required: true },
     uuid: { type: String, default: uuidv4 },
     failedLoginAttempts: { type: Number, default: 0 },
-    lockUntil: { type: Date }
+    lockUntil: { type: Date },
+    sex: { type: String, enum: ['Male', 'Female', 'Other'], required: true } // Nuevo campo agregado
 });
 
 userSchema.pre('save', async function (next) {

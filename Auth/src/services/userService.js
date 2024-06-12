@@ -11,7 +11,7 @@ const LOCK_TIME = 15 * 60 * 1000; // 15 minutos
 
 
 const registerUser = async (userData) => {
-  const { firstName, lastName, dni, email, password, role = 'employed' } = userData;
+  const { firstName, lastName, dni, email, password, role = 'employed',sex } = userData;
 
   // Verificar si el email o el DNI ya existen
   const existingUserByEmail = await User.findOne({ email });
@@ -25,7 +25,7 @@ const registerUser = async (userData) => {
   }
 
   // Crear un nuevo usuario
-  const user = new User({ firstName, lastName, dni, email, password });
+  const user = new User({ firstName, lastName, dni, email, password,sex });
   await user.save();
 
   // Generar un UUID para el dispositivo

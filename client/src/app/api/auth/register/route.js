@@ -7,7 +7,7 @@ const URL_API_AUTH = process.env.NEXT_PUBLIC_URL_API_AUTH;
 export async function POST(req) {
     try {
         const body = await req.json();
-        const { firstName, lastName, dni, email, password } = body;
+        const { firstName, lastName, dni, email, password,sex } = body;
 
         // Enviar la solicitud de registro al backend
         const response = await fetch(`${URL_API_AUTH}/api/auth/register`, {
@@ -15,7 +15,7 @@ export async function POST(req) {
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ firstName, lastName, dni, email, password })
+            body: JSON.stringify({ firstName, lastName, dni, email, password,sex })
         });
 
         const responseData = await response.json();

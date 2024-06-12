@@ -22,6 +22,7 @@ export default function Page() {
     email: "",
     password: "",
     confirmPassword: "",
+    sex: ""
   });
   const router = useRouter();
 
@@ -129,6 +130,21 @@ export default function Page() {
                 value={formData.email}
                 onChange={handleChange}
               />
+            </div>
+            <div>
+              <Label htmlFor="sex">Sexo segun DNI</Label>
+              <select
+                id="sex"
+                required
+                value={formData.sex}
+                onChange={handleChange}
+                className="w-full rounded-md border border-gray-300 p-2 text-gray-900 dark:bg-gray-700 dark:text-white"
+              >
+                <option value="" disabled>Select your sex</option>
+                <option value="Male">Masculino</option>
+                <option value="Female">Femenino</option>
+                <option value="Other">X</option>
+              </select>
             </div>
             <div className="relative">
               <Label htmlFor="password">Password</Label>
