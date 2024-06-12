@@ -1,21 +1,24 @@
-"use client"
+"use client";
+
 import { useState } from "react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { FlagIcon } from "lucide-react";
+import { FlagIcon, LoaderIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 export default function Page() {
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setMessage("");
     setError("");
+    setIsLoading(true);
 
     try {
       const response = await fetch("/api/auth/recovery", {
@@ -29,13 +32,15 @@ export default function Page() {
       if (response.ok) {
         setMessage("El código de restablecimiento ha sido enviado a tu correo electrónico.");
         setEmail(""); // Limpiar el campo de correo electrónico después del envío
-        router.push("/auth/recovery/resetpassword")
+        router.push("/auth/recovery/selector");
       } else {
         const data = await response.json();
         setError(data.error || "Error al enviar el código de restablecimiento.");
       }
     } catch (error) {
       setError("Error al enviar el código de restablecimiento.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -64,8 +69,15 @@ export default function Page() {
                 required 
               />
             </div>
-            <Button type="submit" className="w-full">
-              Enviar código de restablecimiento
+            <Button className="w-full" type="submit" disabled={isLoading}>
+              {isLoading ? (
+                <>
+                  <LoaderIcon className="mr-2 h-4 w-4 animate-spin" />
+                  Loading
+                </>
+              ) : (
+                "Sign In"
+              )}
             </Button>
           </form>
           {message && <p className="text-green-500 text-center mt-4">{message}</p>}

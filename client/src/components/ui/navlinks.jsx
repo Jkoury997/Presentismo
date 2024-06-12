@@ -1,20 +1,49 @@
-"use client";
+'use client';
 
 import { useState } from 'react';
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import clsx from 'clsx';
-import { HomeIcon, LineChartIcon, Settings, ChevronDown, QrCodeIcon,WalletIcon,PersonStandingIcon } from "lucide-react";
+import { HomeIcon, UserRound, ChevronDown } from "lucide-react";
 
-const links = [
-  { 
-    name: 'Home', 
-    href: '/dashboard', 
-    icon: HomeIcon 
-  },
-];
+// Definir enlaces según roles
+const linksByRole = {
+  recursos_humanos: [
+    { 
+      name: 'Home', 
+      href: '/dashboard', 
+      icon: HomeIcon 
+    },
+    { 
+      name: 'Employed', 
+      href: '/dashboard/recursoshumanos', 
+      icon: UserRound,
+      subLinks: [
+        { 
+          name: 'List Employees', 
+          href: '/dashboard/recursoshumanos/employed/list' 
+        },
+        { 
+          name: 'Add Employee', 
+          href: '/dashboard/recursoshumanos/employed/add' 
+        },
+        { 
+          name: 'Modify Attendance', 
+          href: '/dashboard/recursoshumanos/employed/attendance/modify' 
+        },
+      ] 
+    },
+  ],
+  employed: [
+    { 
+      name: 'Home', 
+      href: '/dashboard', 
+      icon: HomeIcon 
+    },
+  ],
+};
 
-export function NavLinks({ onLinkClick }) {
+export function NavLinks({ userRole }) {
   const pathname = usePathname();
   const [openMenus, setOpenMenus] = useState({});
 
@@ -25,14 +54,34 @@ export function NavLinks({ onLinkClick }) {
     }));
   };
 
+  // Obtener enlaces según el rol del usuario
+  let links = linksByRole[userRole] || [];
+
+  // Si el usuario es admin, combinar todos los enlaces sin duplicados
+  if (userRole === 'admin') {
+    const allLinks = Object.values(linksByRole).flat();
+    const uniqueLinks = [];
+
+    allLinks.forEach(link => {
+      const existingLink = uniqueLinks.find(l => l.name === link.name);
+      if (existingLink) {
+        existingLink.subLinks = [...new Set([...(existingLink.subLinks || []), ...(link.subLinks || [])])];
+      } else {
+        uniqueLinks.push(link);
+      }
+    });
+
+    links = uniqueLinks;
+  }
+
   return (
     <>
-      {links.map((link) => {
+      {links.map((link, index) => {
         const LinkIcon = link.icon;
         const isActive = pathname === link.href || link.subLinks?.some(subLink => pathname === subLink.href);
         return (
-          <div key={link.name}>
-            {link.subLinks ? (
+          <div key={`${link.name}-${index}`}>
+            {link.subLinks && link.subLinks.length > 0 ? (
               <>
                 <div
                   className={clsx(
@@ -52,9 +101,9 @@ export function NavLinks({ onLinkClick }) {
                 </div>
                 {openMenus[link.name] && (
                   <div className="pl-6">
-                    {link.subLinks.map((subLink) => (
+                    {link.subLinks.map((subLink, subIndex) => (
                       <Link
-                        key={subLink.name}
+                        key={`${subLink.name}-${subIndex}`}
                         href={subLink.href}
                         className={clsx(
                           'flex items-center gap-3 rounded-lg px-3 py-2 transition-all mt-1',
@@ -63,7 +112,6 @@ export function NavLinks({ onLinkClick }) {
                             'bg-gray-100 text-gray-900 hover:text-gray-900': pathname === subLink.href,
                           }
                         )}
-                        onClick={onLinkClick}
                       >
                         {subLink.name}
                       </Link>
@@ -81,7 +129,6 @@ export function NavLinks({ onLinkClick }) {
                     'bg-gray-100 text-gray-900 hover:text-gray-900': pathname === link.href,
                   }
                 )}
-                onClick={onLinkClick}
               >
                 <div className="flex items-center gap-3">
                   <LinkIcon className="h-4 w-4" />

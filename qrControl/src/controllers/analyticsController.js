@@ -4,6 +4,7 @@ const logger = require('../utils/logger');
 // Obtener asistencia por usuario
 const getAttendanceByUser = async (req, res) => {
   const { useruuid } = req.params;
+  console.log(useruuid)
 
   try {
     const attendanceRecords = await analysisService.getAttendanceByUser(useruuid);

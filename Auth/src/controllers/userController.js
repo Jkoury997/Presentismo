@@ -1,5 +1,5 @@
 // controllers/userController.js
-const { registerUser,loginUser,getClientIp,logoutUser,getUserService,getUserByEmailService} = require('../services/userService');
+const { registerUser,loginUser,getClientIp,logoutUser,getUserService,getUserByEmailService,getAllUsers} = require('../services/userService');
 const { generateAccessToken, generateRefreshToken,revokeTokens} = require('../services/tokenService');
 
 
@@ -75,6 +75,15 @@ async function getUser(req, res) {
     }
   }
   
+  async function listAll(req, res) {
+    try {
+      const users = await getAllUsers();
+      res.status(200).json(users);
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  }
+
   async function getUserByEmail(req, res) {
     try {
       const user = await getUserByEmailService(req.params.email);
@@ -116,5 +125,6 @@ module.exports = {
     getUser,
     getUserByEmail,
     updateUser,
-    deactivateUser
+    deactivateUser,
+    listAll
 };

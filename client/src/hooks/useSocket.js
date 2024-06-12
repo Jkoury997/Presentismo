@@ -3,14 +3,17 @@ import io from 'socket.io-client';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-const NEXT_PUBLIC_URL_WEBSOCKET = process.env.NEXT_PUBLIC_URL_WEBSOCKET
+// Definir la URL del WebSocket desde las variables de entorno
+const NEXT_PUBLIC_URL_WEBSOCKET = process.env.NEXT_PUBLIC_URL_WEBSOCKET;
 
 const useSocket = (userID) => {
     useEffect(() => {
         const socket = io(NEXT_PUBLIC_URL_WEBSOCKET); // Cambia esto a la URL de tu servidor
 
         // Registra el userID con el servidor
-        socket.emit('register', userID);
+        if (userID) {
+            socket.emit('register', userID);
+        }
 
         // Escucha el evento de notificación
         socket.on('notification', (data) => {

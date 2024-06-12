@@ -147,6 +147,14 @@ const deactivateUser = async (userUuid) => {
     }
 };
   
+async function getAllUsers() {
+    try {
+      const users = await User.find({}).select('firstName lastName email dni uuid');
+      return users;
+    } catch (error) {
+      throw new Error('Error al obtener los usuarios');
+    }
+  }
 
 module.exports = {
     registerUser,
@@ -156,5 +164,6 @@ module.exports = {
     getUserService,
     getUserByEmailService,
     updateUser,
-    deactivateUser
+    deactivateUser,
+    getAllUsers
 };

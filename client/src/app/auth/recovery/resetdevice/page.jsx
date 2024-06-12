@@ -1,11 +1,11 @@
 "use client";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { EyeIcon, EyeOffIcon } from "lucide-react";
+import { EyeIcon, EyeOffIcon, LoaderIcon } from "lucide-react";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+import { useRouter } from "next/navigation";
 
 export default function Page() {
   const [formData, setFormData] = useState({
@@ -15,6 +15,7 @@ export default function Page() {
 
   const [error, setError] = useState("");
   const [newDeviceUuid, setNewDeviceUuid] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
   const handleChange = (e) => {
@@ -34,10 +35,11 @@ export default function Page() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
+    setIsLoading(true);
 
     try {
-      const response = await fetch("/api/device/update-with-otp", {
-        method: "PUT",
+      const response = await fetch("/api/auth/recovery/resetdevice", {
+        method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
@@ -52,12 +54,21 @@ export default function Page() {
       }
 
       const data = await response.json();
-      setNewDeviceUuid(data.device.uuid); // Asumiendo que el UUID se devuelve en data.device.uuid
+
+      // Assuming the deviceUUID is returned in the data object
+      localStorage.setItem('deviceUUID', data.data.device.uuid);
+      sessionStorage.setItem('deviceUUID', data.data.device.uuid);
+
+      setNewDeviceUuid(data.data.device.uuid); // Asumiendo que el UUID se devuelve en data.device.uuid
       // Manejar respuesta exitosa
+
+      router.push("/auth/login");
 
     } catch (error) {
       setError("Error al actualizar el dispositivo.");
       console.error(error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -104,12 +115,18 @@ export default function Page() {
           )}
           {newDeviceUuid && (
             <Alert variant="success">
-              <AlertTitle>Éxito</AlertTitle>
-              <AlertDescription>Nuevo UUID del dispositivo: {newDeviceUuid}</AlertDescription>
+              <AlertDescription>Se ha configurado correctamente el dispositivo</AlertDescription>
             </Alert>
           )}
-          <Button className="w-full" type="submit">
-            Actualizar Dispositivo
+          <Button className="w-full" type="submit" disabled={isLoading}>
+            {isLoading ? (
+              <>
+                <LoaderIcon className="mr-2 h-4 w-4 animate-spin" />
+                Loading
+              </>
+            ) : (
+              "Actualizar Dispositivo"
+            )}
           </Button>
         </form>
       </div>

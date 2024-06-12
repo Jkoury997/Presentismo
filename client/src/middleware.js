@@ -17,16 +17,15 @@ export async function middleware(request) {
     try {
         // Verifica el accessToken usando jose
         const { payload } = await jwtVerify(accessToken.value, new TextEncoder().encode(JWT_SECRET));
-        console.log(payload);
-
-        // Verificar el rol del usuario
+        
+        // Obtener el rol del usuario
         const userRole = payload.role;
 
         // Definir roles permitidos para cada ruta
         const allowedRoles = {
             '/dashboard/admin': ['admin'],
             '/dashboard': ['admin', 'employed', 'recursos_humanos'],
-            '/dashboard/recursos-humanos': ['admin', 'recursos_humanos'],
+            '/dashboard/recursoshumanos': ['admin', 'recursos_humanos'],
             // Agregar más rutas y roles permitidos según sea necesario
         };
 
@@ -38,7 +37,12 @@ export async function middleware(request) {
         });
 
         if (isAuthorized) {
-            return NextResponse.next();
+            const response = NextResponse.next();
+            response.cookies.set("userRole", userRole, {
+                path: '/',
+            });
+
+            return response;
         } else {
             const response = NextResponse.redirect(new URL('/dashboard', request.url));
             response.cookies.set("error", "Access Denied", {
@@ -85,5 +89,5 @@ export async function middleware(request) {
 }
 
 export const config = {
-    matcher: ['/dashboard/admin/:path*', '/dashboard/:path*', '/dashboard/recursos-humanos/:path*'], // Rutas protegidas
+    matcher: ['/dashboard/admin/:path*', '/dashboard/:path*', '/dashboard/recursoshumanos/:path*'], // Rutas protegidas
 };

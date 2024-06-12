@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { EyeIcon, EyeOffIcon } from "lucide-react";
+import { EyeIcon, EyeOffIcon, LoaderIcon } from "lucide-react";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { login } from "@/utils/authUtils";
 
@@ -19,6 +19,7 @@ export default function Page() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
   const handleChange = (e) => {
@@ -52,6 +53,7 @@ export default function Page() {
     }
 
     setError("");
+    setIsLoading(true);
 
     try {
       const response = await fetch("/api/auth/recovery/resetpassword", {
@@ -72,12 +74,14 @@ export default function Page() {
 
       const data = await response.json();
       // Manejar respuesta exitosa
-      await login(formData.email,formData.password)
+      await login(formData.email, formData.password);
       router.push("/auth/login");
 
     } catch (error) {
       setError("Error al restablecer la contraseña.");
       console.error(error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -164,8 +168,15 @@ export default function Page() {
               <AlertDescription>{error}</AlertDescription>
             </Alert>
           )}
-          <Button className="w-full" type="submit">
-            Cambiar contraseña
+          <Button className="w-full" type="submit" disabled={isLoading}>
+            {isLoading ? (
+              <>
+                <LoaderIcon className="mr-2 h-4 w-4 animate-spin" />
+                Loading
+              </>
+            ) : (
+              "Cambiar contraseña"
+            )}
           </Button>
         </form>
       </div>

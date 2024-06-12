@@ -9,6 +9,16 @@ async function getDevice(uuid) {
   return device;
 }
 
+async function updateDevice(userUuid, newUuid) {
+  const device = await Device.findOneAndUpdate({ useruuid: userUuid }, { uuid: newUuid }, { new: true });
+  console.log(device)
+  if (!device) {
+    throw new Error('Device not found');
+  }
+  return device;
+}
+
 module.exports = {
-  getDevice
+  getDevice,
+  updateDevice
 };

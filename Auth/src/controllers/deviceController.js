@@ -33,21 +33,29 @@ const requestDeviceUpdateOtp = async (req, res) => {
 
 const updateDeviceWithOtp = async (req, res) => {
   try {
-      const { email, otp } = req.body;
-      const user = await User.findOne({ email });
+    const { email, otp } = req.body;
+    console.log("Email:", email, "OTP:", otp);
 
-      if (!user) {
-          return res.status(404).json({ error: 'User not found' });
-      }
+    const user = await User.findOne({ email });
+    console.log("User found:", user);
 
-      await verifyOtp(user.uuid, otp);
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
 
-      const newDeviceUuid = uuidv4();
-      const updatedDevice = await deviceService.updateDevice(user.uuid, newDeviceUuid);
+    await verifyOtp(user.uuid, otp);
+    console.log("OTP verified");
 
-      res.status(200).json({ message: 'Device updated successfully', device: updatedDevice });
+    const newDeviceUuid = uuidv4();
+    console.log("Generated new device UUID:", newDeviceUuid);
+
+    const updatedDevice = await deviceService.updateDevice(user.uuid, newDeviceUuid);
+    console.log("Updated device:", updatedDevice);
+
+    res.status(200).json({ message: 'Device updated successfully', device: updatedDevice });
   } catch (error) {
-      res.status(400).json({ error: error.message });
+    console.error("Error in updateDeviceWithOtp:", error.message);
+    res.status(400).json({ error: error.message });
   }
 };
 

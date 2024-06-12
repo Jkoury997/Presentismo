@@ -6,7 +6,7 @@ import { UserDropMenu } from "./user";
 import { NavLinks } from "./navlinks";
 import { MenuIcon } from "lucide-react"; // Asegúrate de importar el icono del menú
 
-export default function Header({ title }) {
+export default function Header({ title, userRole }) {
   const [isSheetOpen, setSheetOpen] = useState(false);
 
   const handleLinkClick = () => {
@@ -27,12 +27,11 @@ export default function Header({ title }) {
             <SheetTitle>{title}</SheetTitle>
           </SheetHeader>
           <div className="flex flex-col gap-2">
-            <NavLinks onLinkClick={handleLinkClick} />
+            <NavLinks userRole={userRole} onLinkClick={handleLinkClick} />
           </div>
         </SheetContent>
       </Sheet>
-      <div className="flex flex-1 items-center gap-4 md:ml-auto md:gap-2 lg:gap-4">
-        <Search />
+      <div className="flex flex-1 items-center gap-4 md:ml-auto md:gap-2 lg:gap-4 justify-end">
         <UserDropMenu />
       </div>
     </header>
