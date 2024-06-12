@@ -4,8 +4,8 @@ import { cookies } from 'next/headers';
 const URL_API_PRESENTISMO = process.env.NEXT_PUBLIC_URL_API_PRESENTISMO;
 
 export async function POST(request) {
-    const cookieStore = cookies();
-    const token = cookieStore.get('accessToken'); // Asume que el token se almacena en una cookie llamada 'accessToken'
+  const cookieStore = cookies();
+  const token = cookieStore.get('accessToken'); // Asume que el token se almacena en una cookie llamada 'accessToken'
   try {
     const { code, location } = await request.json();
 
@@ -21,7 +21,7 @@ export async function POST(request) {
 
     if (!response.ok) {
       const errorData = await response.json();
-      return NextResponse.json({ error: `Network response was not ok: ${errorData.message}` }, { status: response.status });
+      return NextResponse.json({ error: `Error: ${errorData.message}` }, { status: response.status });
     }
 
     const responseData = await response.json();

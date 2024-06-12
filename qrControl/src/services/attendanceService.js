@@ -61,7 +61,7 @@ const registerAttendance = async (code, location, io) => { // Agregamos io como 
     }
   } catch (error) {
     console.error('Error registering attendance:', error);
-    throw new Error('Error registering attendance');
+    throw error;
   }
 };
 

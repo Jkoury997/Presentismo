@@ -53,7 +53,7 @@ export default function Reader() {
   }, []);
 
   async function registerAttendance(code, location) {
-    const response = await fetch(`/api/presentismo/attendance/register`, {
+    const response = await fetch('/api/attendance/register-attendance', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -62,7 +62,8 @@ export default function Reader() {
     });
 
     if (!response.ok) {
-      throw new Error('Failed to check in employee');
+      const errorData = await response.json();
+      throw new Error(errorData.error || 'Failed to check in employee');
     }
 
     return await response.json();
@@ -105,7 +106,7 @@ export default function Reader() {
         setLastScannedCode(scannedCode);
       } catch (error) {
         console.error('Error checking in employee:', error);
-        setMessage('Error checking in employee');
+        setMessage(error.message || 'Error checking in employee');
       } finally {
         setScanning(false); // Permitir nuevos escaneos
         if (scannerRef.current && scannerRef.current.resetScanner) {
