@@ -8,6 +8,7 @@ export async function GET(req) {
         const cookieStore = cookies();
         const deviceUUID = cookieStore.get("deviceUUID").value;
         const useruuid = cookieStore.get("useruuid").value;
+        const token = cookieStore.get('accessToken');
 
         if (!deviceUUID || !useruuid) {
             throw new Error('deviceUUID or useruuid not found in cookies');
@@ -17,7 +18,9 @@ export async function GET(req) {
         const response = await fetch(`${URL_API_PRESENTISMO}/api/qr/generate-qr`, {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token?.value}` // Accede al valor del token
+
             },
             body: JSON.stringify({ useruuid: useruuid, deviceUUID: deviceUUID })
         });

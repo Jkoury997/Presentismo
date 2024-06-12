@@ -2,6 +2,7 @@ const express = require('express');
 const analyticsController = require('../controllers/analyticsController');
 const validateRequest = require('../middlewares/validateRequest');
 const { validateUserUUID, validateDateRange } = require('../validators/analyticsValidator');
+const { verifyToken,authorizeRoles,authorizeRolesOrSelf } =require ('../middlewares/authMiddleware');
 
 const router = express.Router();
 
@@ -10,6 +11,8 @@ router.get(
   '/user/:useruuid',
   validateUserUUID,
   validateRequest,
+  verifyToken,
+  authorizeRolesOrSelf('admin', 'recursos_humanos'),
   analyticsController.getAttendanceByUser
 );
 
@@ -18,6 +21,8 @@ router.get(
   '/user/:useruuid/date-range',
   [...validateUserUUID, ...validateDateRange],
   validateRequest,
+  verifyToken,
+  authorizeRolesOrSelf('admin', 'recursos_humanos'),
   analyticsController.getAttendanceByUserAndDateRange
 );
 
@@ -26,6 +31,8 @@ router.get(
   '/date-range',
   validateDateRange,
   validateRequest,
+  verifyToken,
+  authorizeRoles('admin', 'recursos_humanos'),
   analyticsController.getAttendanceByDateRange
 );
 

@@ -14,7 +14,7 @@ export async function GET(request) {
     if (!useruuid) {
       return NextResponse.json({ error: 'User UUID is required' }, { status: 400 });
     }
-
+    
     const response = await fetch(`${URL_API_AUTH}/api/user/${useruuid}`, {
       method: 'GET',
       headers: {

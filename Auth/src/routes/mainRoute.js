@@ -10,8 +10,8 @@ const express = require("express")
 
 const router = express.Router();
 
-router.use('/auth', authRoute);
-router.use('/recovery', recoveryRoute);
+router.use('/auth', authRoute); //Seguridad completa
+router.use('/recovery', recoveryRoute); //No necesita Seguridad
 router.use('/token', tokenRoute);
 router.use('/user', userRoute);
 router.use('/device', deviceRoute);

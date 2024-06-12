@@ -1,3 +1,5 @@
+const { verifyToken,authorizeRoles } =require ('../middlewares/authMiddleware');
+
 const express = require('express');
 const zoneController = require('../controllers/zoneController');
 const validateRequest = require('../middlewares/validateRequest');
@@ -9,20 +11,23 @@ router.post(
   '/',
   validateZoneCreation,
   validateRequest,
+  verifyToken,
+  authorizeRoles('admin', 'recursos_humanos'),
   zoneController.createZone
 );
 
 router.get('/', zoneController.getZones);
-router.get('/:id', zoneController.getZoneById);
+router.get('/:uuid', zoneController.getZoneByuuid);
 
 router.put(
   '/:id',
   validateZoneUpdate,
   validateRequest,
+  verifyToken,
   zoneController.updateZone
 );
 
-router.delete('/:id', zoneController.deleteZone);
+router.delete('/:id',verifyToken,authorizeRoles('admin', 'recursos_humanos'), zoneController.deleteZone);
 
 router.post('/link-device', zoneController.linkDeviceToZone); // Nueva ruta
 router.post('/verify', zoneController.verifyZoneAndDevice); // Nueva ruta para verificar zona y dispositivo

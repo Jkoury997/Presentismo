@@ -1,6 +1,6 @@
-import { NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
-import { jwtVerify } from 'jose';
+const { NextResponse } = require('next/server');
+const { cookies } = require('next/headers');
+const { jwtVerify } = require('jose');
 
 const URL_API_AUTH = process.env.NEXT_PUBLIC_URL_API_AUTH;
 const JWT_SECRET = process.env.JWT_SECRET;
@@ -24,17 +24,25 @@ export async function middleware(request) {
         // Definir roles permitidos para cada ruta
         const allowedRoles = {
             '/dashboard/admin': ['admin'],
-            '/dashboard': ['admin', 'employed', 'recursos_humanos'],
             '/dashboard/recursoshumanos': ['admin', 'recursos_humanos'],
+            '/dashboard': ['admin', 'employed', 'recursos_humanos'],
             // Agregar más rutas y roles permitidos según sea necesario
         };
 
         const pathname = request.nextUrl.pathname;
 
         // Comprobar si el rol del usuario está permitido en la ruta actual
-        const isAuthorized = Object.keys(allowedRoles).some((path) => {
-            return pathname.startsWith(path) && allowedRoles[path].includes(userRole);
-        });
+        let isAuthorized = false;
+        for (const [path, roles] of Object.entries(allowedRoles)) {
+            if (pathname === path || pathname.startsWith(`${path}/`)) {
+                if (roles.includes(userRole)) {
+                    isAuthorized = true;
+                } else {
+                    isAuthorized = false;
+                    break;
+                }
+            }
+        }
 
         if (isAuthorized) {
             const response = NextResponse.next();
@@ -89,5 +97,9 @@ export async function middleware(request) {
 }
 
 export const config = {
-    matcher: ['/dashboard/admin/:path*', '/dashboard/:path*', '/dashboard/recursoshumanos/:path*'], // Rutas protegidas
+    matcher: [
+        '/dashboard/admin/:path*',
+        '/dashboard/recursoshumanos/:path*',
+        '/dashboard/:path*'
+    ], // Rutas protegidas
 };

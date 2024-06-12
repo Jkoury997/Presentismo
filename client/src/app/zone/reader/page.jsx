@@ -18,10 +18,31 @@ export default function Reader() {
   const scannerRef = useRef(null); // Referencia al componente QRScanner
 
   useEffect(() => {
-    const zoneUUID = localStorage.getItem('zoneUUID');
-    if (!zoneUUID) {
-      router.push('/zone/configure');
-    }
+    const checkZoneUUID = async () => {
+      const zoneUUID = localStorage.getItem('zoneUUID');
+      if (!zoneUUID) {
+        router.push('/zone/configure');
+        return;
+      }
+      
+      try {
+        const response = await fetch(`/api/presentismo/zones/find?uuid=${zoneUUID}`);
+        if (!response.ok) {
+          throw new Error('Zone not found');
+        }
+        const data = await response.json();
+        if (data.error) {
+          throw new Error(data.error);
+        }
+      } catch (error) {
+        console.error('Error fetching zone:', error);
+        localStorage.removeItem('zoneUUID');
+        sessionStorage.removeItem('zoneUUID');
+        router.push('/zone/configure');
+      }
+    };
+
+    checkZoneUUID();
   }, [router]);
 
   useEffect(() => {
@@ -84,9 +105,13 @@ export default function Reader() {
       } catch (error) {
         console.error('Error checking in employee:', error);
         setMessage('Error checking in employee');
+        localStorage.removeItem('zoneUUID');
+        sessionStorage.removeItem('zoneUUID');
       } finally {
         setScanning(false); // Permitir nuevos escaneos
-        scannerRef.current.resetScanner(); // Reiniciar el escáner
+        if (scannerRef.current && scannerRef.current.resetScanner) {
+          scannerRef.current.resetScanner(); // Reiniciar el escáner
+        }
       }
     }
   };

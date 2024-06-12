@@ -23,9 +23,10 @@ const getZones = async (req, res) => {
   }
 };
 
-const getZoneById = async (req, res) => {
+const getZoneByuuid = async (req, res) => {
+  console.log(req.params.uuid)
   try {
-    const zone = await zoneService.getZoneById(req.params.id);
+    const zone = await zoneService.getZoneByUUID(req.params.uuid);
     if (!zone) {
       return res.status(404).json({ error: 'Zone not found' });
     }
@@ -92,7 +93,7 @@ const verifyZoneAndDevice = async (req, res) => {
 module.exports = {
   createZone,
   getZones,
-  getZoneById,
+  getZoneByuuid,
   updateZone,
   deleteZone,
   linkDeviceToZone,
