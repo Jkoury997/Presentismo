@@ -24,7 +24,7 @@ export default function Reader() {
         router.push('/zone/configure');
         return;
       }
-      
+
       try {
         const response = await fetch(`/api/presentismo/zones/find?uuid=${zoneUUID}`);
         if (!response.ok) {
@@ -85,7 +85,8 @@ export default function Reader() {
       try {
         const location = localStorage.getItem('zoneUUID');
         if (!location) {
-          router.push('/zone/configure');
+          setMessage('Zone not configured. Please configure the zone first.');
+          setScanning(false);
           return;
         }
 
@@ -105,8 +106,6 @@ export default function Reader() {
       } catch (error) {
         console.error('Error checking in employee:', error);
         setMessage('Error checking in employee');
-        localStorage.removeItem('zoneUUID');
-        sessionStorage.removeItem('zoneUUID');
       } finally {
         setScanning(false); // Permitir nuevos escaneos
         if (scannerRef.current && scannerRef.current.resetScanner) {
