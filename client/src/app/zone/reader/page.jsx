@@ -53,7 +53,7 @@ export default function Reader() {
   }, []);
 
   async function registerAttendance(code, location) {
-    const response = await fetch('/api/attendance/register-attendance', {
+    const response = await fetch('/api/presentismo/attendance/register', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
