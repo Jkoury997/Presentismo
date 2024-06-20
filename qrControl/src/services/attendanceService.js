@@ -81,7 +81,26 @@ const closeAutomaticSessions = async () => {
   return sessionsToClose;
 };
 
+const updateAttendance = async (id, entryTime, exitTime, modifiedBy) => {
+  const updateFields = { modifiedBy };
+
+  if (entryTime) {
+    updateFields.modifiedEntryTime = entryTime;
+  }
+  if (exitTime) {
+    updateFields.modifiedExitTime = exitTime;
+  }
+
+  return Attendance.findByIdAndUpdate(
+    id,
+    updateFields,
+    { new: true, runValidators: true }
+  );
+};
+
+
 module.exports = {
   registerAttendance,
   closeAutomaticSessions,
+  updateAttendance
 };

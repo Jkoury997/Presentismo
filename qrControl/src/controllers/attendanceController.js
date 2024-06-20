@@ -26,7 +26,22 @@ const closeAutomaticSessions = async (req, res) => {
   }
 };
 
+const updateAttendance = async (req, res) => {
+  const { id } = req.params;
+  const { entryTime, exitTime, modifiedBy } = req.body;
+
+  try {
+    const updatedAttendance = await attendanceService.updateAttendance(id, entryTime, exitTime, modifiedBy);
+    logger.info('Attendance updated for id %s by user %s', id, modifiedBy);
+    res.status(200).json(updatedAttendance);
+  } catch (error) {
+    logger.error('Error updating attendance for id %s by user %s: %o', id, modifiedBy, error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
 module.exports = {
   registerAttendance,
   closeAutomaticSessions,
+  updateAttendance
 };

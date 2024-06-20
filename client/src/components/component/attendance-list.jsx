@@ -1,22 +1,29 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState, useMemo, useEffect } from "react"
 import { Button } from "@/components/ui/button"
-import { ListIcon, AlertTriangleIcon } from "lucide-react"
+import { AlertTriangleIcon } from "lucide-react"
 import DateFilter from "./filter-date"
 
 export default function AttendanceList({ data }) {
-  const [sortOrder, setSortOrder] = useState("desc")
   const [startDate, setStartDate] = useState(null)
   const [endDate, setEndDate] = useState(null)
+  const [editingRow, setEditingRow] = useState(null)
+  const [editedData, setEditedData] = useState({})
+  const [localData, setLocalData] = useState([])
+
+  useEffect(() => {
+    console.log('Received data:', data)
+    setLocalData(data)
+  }, [data])
 
   const filteredData = useMemo(() => {
-    if (!startDate && !endDate) return data
+    if (!startDate && !endDate) return localData
 
     const start = startDate ? new Date(startDate.setHours(0, 0, 0, 0)) : null
     const end = endDate ? new Date(endDate.setHours(23, 59, 59, 999)) : null
 
-    return data.filter(row => {
+    return localData.filter(row => {
       const rowDate = new Date(row.date)
       if (start && end) {
         return rowDate >= start && rowDate <= end
@@ -27,27 +34,65 @@ export default function AttendanceList({ data }) {
       }
       return true
     })
-  }, [data, startDate, endDate])
+  }, [localData, startDate, endDate])
 
-  const sortedData = useMemo(() => {
-    return [...filteredData].sort((a, b) => {
-      const dateA = new Date(a.date)
-      const dateB = new Date(b.date)
-
-      if (dateA < dateB) return -1
-      if (dateA > dateB) return 1
-
-      // If dates are the same, sort by duration
-      if (sortOrder === "desc") {
-        return b.duration - a.duration
-      } else {
-        return a.duration - b.duration
-      }
+  const handleEditRow = (index) => {
+    setEditingRow(index)
+    setEditedData({
+      ...localData[index],
+      entries: localData[index].entries.map(entry => ({ ...entry })),
+      exits: localData[index].exits.map(exit => ({ ...exit }))
     })
-  }, [filteredData, sortOrder])
+  }
 
-  const handleSortChange = () => {
-    setSortOrder(sortOrder === "desc" ? "asc" : "desc")
+  const handleEditChange = (event, type, entryOrExitIndex, timeOrLocation) => {
+    const newValue = event.target.value
+    const updatedData = { ...editedData }
+    if (type === "entry") {
+      updatedData.entries[entryOrExitIndex][timeOrLocation] = newValue
+    } else {
+      updatedData.exits[entryOrExitIndex][timeOrLocation] = newValue
+    }
+    setEditedData(updatedData)
+  }
+
+  const handleSaveEdit = async () => {
+    const updatedData = [...localData]
+    updatedData[editingRow] = editedData
+
+    console.log('Saving edited data:', updatedData[editingRow])
+
+    try {
+      const response = await fetch(`/api/presentismo/attendance/register/update`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          entryTime: editedData.entries[0]?.time || null,
+          exitTime: editedData.exits[0]?.time || null,
+          date: updatedData[editingRow].date,
+          id: updatedData[editingRow].entries[0].id
+        }),
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        console.log('Updated successfully:', result);
+        setLocalData(updatedData);
+        setEditingRow(null);
+        setEditedData({});
+      } else {
+        console.error('Failed to update:', response.statusText);
+      }
+    } catch (error) {
+      console.error('Error updating:', error);
+    }
+  }
+
+  const handleCancelEdit = () => {
+    setEditingRow(null)
+    setEditedData({})
   }
 
   return (
@@ -61,10 +106,6 @@ export default function AttendanceList({ data }) {
             setStartDate={setStartDate}
             setEndDate={setEndDate}
           />
-          <Button variant="outline" onClick={handleSortChange} className="flex items-center gap-2">
-            <ListIcon className="w-4 h-4" />
-            <span>Ordenar por duración</span>
-          </Button>
         </div>
       </div>
       <div className="flex-1 overflow-x-auto p-6 sm:p-8">
@@ -75,37 +116,92 @@ export default function AttendanceList({ data }) {
               <th className="px-4 py-3 text-left font-medium text-gray-700 dark:text-gray-300">Entradas</th>
               <th className="px-4 py-3 text-left font-medium text-gray-700 dark:text-gray-300">Salidas</th>
               <th className="px-4 py-3 text-left font-medium text-gray-700 dark:text-gray-300">Duración</th>
+              <th className="px-4 py-3 text-left font-medium text-gray-700 dark:text-gray-300">Acciones</th>
             </tr>
           </thead>
           <tbody>
-            {sortedData.map((row, index) => (
+            {filteredData.map((row, index) => (
               <tr key={index} className="border-b border-gray-200 dark:border-gray-700">
                 <td className="px-4 py-3 text-gray-700 dark:text-gray-300">{row.date}</td>
                 <td className="px-4 py-3 text-gray-700 dark:text-gray-300">
-                  <ul className="list-disc list-inside">
-                    {row.entries.map((entry, idx) => (
-                      <li key={idx} className="flex items-center gap-2">
-                        {entry.time} - {entry.location}
-                        {entry.closedAutomatically && (
-                          <AlertTriangleIcon className="text-yellow-500 w-4 h-4" title="Cerrado automáticamente" />
-                        )}
-                      </li>
-                    ))}
-                  </ul>
+                  {editingRow === index ? (
+                    <ul className="list-disc list-inside">
+                      {row.entries.map((entry, entryIndex) => (
+                        <li key={entryIndex}>
+                          <input
+                            type="text"
+                            value={editedData.entries?.[entryIndex]?.time || ''}
+                            onChange={(e) => handleEditChange(e, "entry", entryIndex, "time")}
+                            className="w-20 px-2 py-1 border border-gray-300 rounded-md"
+                          />
+                          - <span>{entry.location}</span>
+                          {entry.closedAutomatically && (
+                            <AlertTriangleIcon className="text-yellow-500 w-4 h-4" title="Cerrado automáticamente" />
+                          )}
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <ul className="list-disc list-inside">
+                      {row.entries.map((entry, entryIndex) => (
+                        <li key={entryIndex}>
+                          {entry.time} - {entry.location}
+                          {entry.closedAutomatically && (
+                            <AlertTriangleIcon className="text-yellow-500 w-4 h-4" title="Cerrado automáticamente" />
+                          )}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
                 </td>
                 <td className="px-4 py-3 text-gray-700 dark:text-gray-300">
-                  <ul className="list-disc list-inside">
-                    {row.exits.map((exit, idx) => (
-                      <li key={idx} className="flex items-center gap-2">
-                        {exit.time} - {exit.location}
-                        {exit.closedAutomatically && (
-                          <AlertTriangleIcon className="text-yellow-500 w-4 h-4" title="Cerrado automáticamente" />
-                        )}
-                      </li>
-                    ))}
-                  </ul>
+                  {editingRow === index ? (
+                    <ul className="list-disc list-inside">
+                      {row.exits.map((exit, exitIndex) => (
+                        <li key={exitIndex}>
+                          <input
+                            type="text"
+                            value={editedData.exits?.[exitIndex]?.time || ''}
+                            onChange={(e) => handleEditChange(e, "exit", exitIndex, "time")}
+                            className="w-20 px-2 py-1 border border-gray-300 rounded-md"
+                          />
+                          - <span>{exit.location}</span>
+                          {exit.closedAutomatically && (
+                            <AlertTriangleIcon className="text-yellow-500 w-4 h-4" title="Cerrado automáticamente" />
+                          )}
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <ul className="list-disc list-inside">
+                      {row.exits.map((exit, exitIndex) => (
+                        <li key={exitIndex}>
+                          {exit.time} - {exit.location}
+                          {exit.closedAutomatically && (
+                            <AlertTriangleIcon className="text-yellow-500 w-4 h-4" title="Cerrado automáticamente" />
+                          )}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
                 </td>
                 <td className="px-4 py-3 text-gray-700 dark:text-gray-300">{row.duration} horas</td>
+                <td className="px-4 py-3 text-gray-700 dark:text-gray-300">
+                  {editingRow === index ? (
+                    <>
+                      <Button variant="outline" onClick={handleSaveEdit} className="mr-2">
+                        Guardar
+                      </Button>
+                      <Button variant="outline" onClick={handleCancelEdit}>
+                        Cancelar
+                      </Button>
+                    </>
+                  ) : (
+                    <Button variant="outline" onClick={() => handleEditRow(index)}>
+                      Editar
+                    </Button>
+                  )}
+                </td>
               </tr>
             ))}
           </tbody>

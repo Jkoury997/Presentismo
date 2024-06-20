@@ -1,3 +1,5 @@
+const { verifyToken,authorizeRoles } = require('../middlewares/authMiddleware');
+
 const express = require('express');
 const attendanceController = require('../controllers/attendanceController');
 const validateRequest = require('../middlewares/validateRequest');
@@ -10,6 +12,13 @@ router.post(
   validateAttendance,
   validateRequest,
   attendanceController.registerAttendance
+);
+
+router.put(
+  '/update-attendance/:id',
+  verifyToken,
+  authorizeRoles('admin', 'recursos_humanos'),
+  attendanceController.updateAttendance
 );
 
 

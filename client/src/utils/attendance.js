@@ -1,5 +1,3 @@
-// utils/attendance.js
-
 const formatDate = (isoDate) => {
   const date = new Date(isoDate);
   return date.toISOString().split('T')[0]; // YYYY-MM-DD
@@ -18,6 +16,7 @@ const calculateDuration = (entryTime, exitTime) => {
 };
 
 const transformData = (data, zones) => {
+  console.log(data);
   const groupedData = {};
 
   const zoneMap = zones.reduce((acc, zone) => {
@@ -27,17 +26,22 @@ const transformData = (data, zones) => {
 
   data.forEach(item => {
     const date = formatDate(item.entryTime);
+    const entryTime = item.modifiedEntryTime || item.entryTime;
+    const exitTime = item.modifiedExitTime || item.exitTime;
+    
     const entry = {
-      time: formatTime(item.entryTime),
+      time: formatTime(entryTime),
       location: zoneMap[item.location] || item.location,
-      closedAutomatically: item.closedAutomatically
+      closedAutomatically: item.closedAutomatically,
+      id: item._id // Agregar el ID aquí
     };
     const exit = {
-      time: formatTime(item.exitTime),
+      time: formatTime(exitTime),
       location: zoneMap[item.location] || item.location,
-      closedAutomatically: item.closedAutomatically
+      closedAutomatically: item.closedAutomatically,
+      id: item._id // Agregar el ID aquí
     };
-    const duration = calculateDuration(item.entryTime, item.exitTime);
+    const duration = calculateDuration(entryTime, exitTime);
 
     if (!groupedData[date]) {
       groupedData[date] = { date, entries: [], exits: [], duration: 0 };
